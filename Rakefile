@@ -7,6 +7,7 @@ require "rake/rdoctask"
 require "rake/gempackagetask"
 
 
+spec = Gem::Specification.load(File.join(File.dirname(__FILE__), 'scrapi.gemspec'))
 
 desc "Generate documentation"
 Rake::RDocTask.new(:rdoc) do |rdoc|
@@ -26,41 +27,7 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-
-desc "Package as a Gem"
-gem_spec = Gem::Specification.new do |spec|
-
-  version = nil
-  File.readlines("CHANGELOG").each do |line|
-    if line =~ /Version (\d+\.\d+\.\d+)/
-      version = $1
-      break
-    end
-  end
-  raise RuntimeError, "Can't find version number in changelog" unless version
-
-  spec.name = "scrapi"
-  spec.version = version
-  spec.summary = "scrAPI toolkit for Ruby. Uses CSS selectors to write easy, maintainable HTML scraping rules."
-  spec.description = <<-EOF
-scrAPI is an HTML scraping toolkit for Ruby. It uses CSS selectors to write easy, maintainable scraping rules to select, extract and store data from HTML content.
-EOF
-  spec.author = "Assaf Arkin"
-  spec.email = "assaf.arkin@gmail.com"
-  spec.homepage = "http://blog.labnotes.org/category/scrapi/"
-
-  spec.files = FileList["{test,lib}/**/*", "README.rdoc", "CHANGELOG", "Rakefile", "MIT-LICENSE"].to_a
-  spec.require_path = "lib"
-  spec.autorequire = "scrapi.rb"
-  spec.requirements << "Tidy"
-  spec.add_dependency "tidy",  ">=1.1.0"
-  spec.has_rdoc = true
-  spec.rdoc_options << "--main" << "README.rdoc" << "--title" <<  "scrAPI toolkit for Ruby" << "--line-numbers"
-  spec.extra_rdoc_files = ["README.rdoc"]
-  spec.rubyforge_project = "scrapi"
-end
-
-gem = Rake::GemPackageTask.new(gem_spec) do |pkg|
+gem = Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
   pkg.need_zip = true
 end
