@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>scrAPI Cheat Sheet</title>
+    <style type="text/css">
+body {
+  background: white;
+  font-family: Verdana, "Lucida Grande", Arial, Helvetica, sans-serif;
+  text-align: left;
+  margin: 2em;
+}
+h1 {
+  background: #b90b0a;
+  color: white;
+  padding: 0 0.5em 0.3em 0.5em;
+  font-size: 2em;
+  margin: 0 0 0.5em 0;
+}
+h1.separator {
+  display: none;
+}
+h2 {
+  color: #aba9a8;
+}
+p, dl, dl dt {
+  margin: 0 0 0.5em 0;
+}
+dl dt {
+  font-weight: bold;
+}
+dl dd {
+  margin: 0 0 0.5em 2em;
+}
+dl.compact dt {
+  float: left;
+  clear: both;
+  display: inline;
+  width: 15em;
+  margin: 0;
+  font-weight: normal;
+  font-family: "Courier New";
+}
+dl.compact dd {
+  margin: 0 0 0.3em 15em;
+}
+code, pre {
+  font-family: "Courier New";
+}
+pre {
+  font-weight: bold;
+}
+p.copyright {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 2em;
+}
+br.force-break {
+  display: none;
+}
+@media print {
+  @page {
+    size: 8in 8in;
+    margin: 1cm;
+  }
+  body {
+    font-size: 11pt;
+  }
+  h1 {
+    padding: 0.3cm;
+    font-size: 200%;
+    margin: 0 0 0.6cm 0;
+  }
+  h1.separator {
+    border-top: 0.77cm solid white;
+    display: block;
+    page-break-before: always;
+  }
+  p, dl, dl dt {
+    margin: 0 0 0.3cm 0;
+  }
+  dl dd {
+    margin: 0 0 0.3cm 0.6cm;
+  }
+  dl.compact dt {
+    width: 6cm;
+    margin: 0;
+  }
+  dl.compact dd {
+    margin: 0 0 0.15cm 6cm;
+  }
+  p.copyright {
+    margin-top: 2cm;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <h1>scrAPI Cheat Sheet</h1>
+    <h2>Selectors</h2>
+    <dl class="compact">
+      <dt>*</dt><dd>any element</dd>
+      <dt>E</dt><dd>an element of type E</dd>
+      <dt>E.warning</dt><dd>an E element whose class is "warning" (the document language specifies how class is determined).</dd>
+      <dt>E#myid</dt><dd>an E element with ID equal to "myid".</dd>
+      <dt>E[foo]</dt><dd>an E element with a "foo" attribute</dd>
+      <dt>E[foo="bar"]</dt><dd>an E element whose "foo" attribute value is exactly equal to "bar"</dd>
+      <dt>E[foo~="bar"]</dt><dd>an E element whose "foo" attribute value is a list of space-separated values, one of which is exactly equal to "bar"</dd>
+      <dt>E[foo^="bar"]</dt><dd>an E element whose "foo" attribute value begins exactly with the string "bar"</dd>
+      <dt>E[foo$="bar"]</dt><dd>an E element whose "foo" attribute value ends exactly with the string "bar"</dd>
+      <dt>E[foo*="bar"]</dt><dd>an E element whose "foo" attribute value contains the substring "bar"</dd>
+      <dt>E[hreflang|="en"]</dt><dd>an E element whose "hreflang" attribute has a hyphen-separated list of values beginning (from the left) with "en"</dd>
+      <dt>E:root</dt><dd>an E element, root of the document</dd>
+      <dt>E:nth-child(n)</dt><dd>an E element, the n-th child of its parent</dd>
+      <dt>E:nth-last-child(n)</dt><dd>an E element, the n-th child of its parent, counting from the last one</dd>
+      <dt>E:nth-of-type(n)</dt><dd>an E element, the n-th sibling of its type</dd>
+      <dt>E:nth-last-of-type(n)</dt><dd>an E element, the n-th sibling of its type, counting from the last one</dd>
+      <dt>E:first-child</dt><dd>an E element, first child of its parent</dd>
+      <dt>E:last-child</dt><dd>an E element, last child of its parent</dd>
+      <dt>E:first-of-type</dt><dd>an E element, first sibling of its type</dd>
+      <dt>E:last-of-type</dt><dd>an E element, last sibling of its type</dd>
+      <dt>E:only-child</dt><dd>an E element, only child of its parent</dd>
+      <dt>E:only-of-type</dt><dd>an E element, only sibling of its type</dd>
+      <dt>E:empty</dt><dd>an E element that has no children (including text nodes)</dd>
+      <dt>E:not(s)</dt><dd>an E element that does not match simple selector s</dd>
+      <dt>E F</dt><dd>an F element descendant of an E element</dd>
+      <dt>E > F</dt><dd>an F element child of an E element</dd>
+      <dt>E + F</dt><dd>an F element immediately preceded by an E element</dd>
+      <dt>E ~ F</dt><dd>an F element preceded by an E element</dd>
+    </dl>
+    <h2>Substitution Values</h2>
+    <dl class="compact">
+      <dt>.?</dt><dd>Class name</dd>
+      <dt>#?</dt><dd>ID attribute</dd>
+      <dt>[foo=?]</dt><dd>Attribute value</dd>
+    </dl>
+    <h1 class="separator">scrAPI Cheat Sheet</h1>
+    <h2>Scraping</h2>
+    <dl>
+      <dt><code>Scraper.scrape(source, options?) => result</code></dt>
+      <dd>
+        <p>Scrapes source and returns the result. Source is one of:</p>
+        <dl class="compact">
+          <dt>String</dt><dd>HTML content: parse and scrape.</dd>
+          <dt>URI</dt><dd>Page URL: read, parse and scrape.</dd>
+          <dt>HTML::Node</dt><dd>Element or document, for use with structures.</dd>
+        </dl>
+        <p>Options for reading: <code>:last_modified</code>, <code>:etag</code>, <code>:redirect_limit</code>, <code>:user_agent</code>, <code>:timeout</code>.</p>
+        <p>Options for parsing: <code>:root_element</code>, <code>:parser</code>, <code>:parser_options</code> (pass to Tidy).</p>
+      </dd>
+    </dl>
+    <h2>Scraper Definition</h2>
+    <dl>
+      <dt><code>process(selector, *values, extractor?) { |element| .... }<br/>process(symbol?, selector, *values, extractor?) { |element| ... }</code></dt>
+      <dd>
+        <p>Use <code>selector</code> to select elements, and <code>extractor</code> to extract and store values. Pass each selected element to the block. Block can be used instead of or in combination with extractors.</p>
+        <p>Extract value from (see more options in API):</p>
+        <dl class="compact">
+          <dt>:element</dt><dd>Element itself</dd>
+          <dt>:text</dt><dd>Text value of element</dd>
+          <dt>Class</dt><dd>Another scraper</dd>
+          <dt>"elem"</dt><dd>Element if name matches</dd>
+          <dt>"@attr"</dt><dd>Attribute if specified</dd>
+          <dt>"elem@attr"</dt><dd>Attribute if specified on element</dd>
+          <dt>[value, ...]</dt><dd>First value that matches</dd>
+        </dl>
+        <p>Extract value to (more options in API):</p>
+        <dl class="compact">
+          <dt>symbol</dt><dd>Instance variable (e.g. :title to @title)</dd>
+          <dt>symbol[]</dt><dd>Array instance variable (e.g. "links[]")</dd>
+          <dt>:skip</dt><dd>If <code>true</code>, do not further process this element</dd>
+        </dl>
+        <p>Attribute accessors defined for each symbol used.</p>
+        <p>If first argument is <code>symbol</code>, uses that name to replace any other processing rule with same name.</p>
+      </dd>
+      <dt><code>process_first(selector, *values, extractor?) { |element| .... }<br/>process_first(symbol?, selector, *values, extractor?) { |element| ... }</code></dt>
+      <dd><p>Similar to <code>process</code> but only processes the first selected element (if more than one).</p></dd>
+    </dl>
+    <h1 class="separator">scrAPI Cheat Sheet</h1>
+    <dl>
+      <dt><code>result(*symbols)</code></dt>
+      <dd><p>Specifies which instance variables to return. One symbol: return value of that variable. Multiple symbols: return object with suitable accessors.</p></dd>
+      <dt><code>array(*symbols)</code></dt>
+      <dd><p>Specifies which instance variables are arrays. Otherwise, stores only last extracted value.</p></dd>
+      <dt><code>selector(symbol, selector, *values)<br/>selector(symbol?, selector, *values) { |elements| ... }</code></dt>
+      <dd><p>Defines selector method with the given name (<code>symbol</code>) that takes an element as argument and returns array of selected elements, empty if no elements selected. Defines <code>first_</code> method that returns the first selected element or <code>nil</code>.</p></dd>
+    </dl>
+    <h2>Instance Methods</h2>
+    <dl class="compact">
+      <dt><code>extracted</code></dt>
+      <dd>True if any processing rule returned true (also <code>extracted = true/false</code>).</dd>
+      <dt><code>skip(element?)</code></dt>
+      <dd>Do not further process element. See also <code>:skip=&gt;true</code>.</dd>
+      <dt><code>stop()</code></dt>
+      <dd>Stop processing.</dd>
+      <dt><code>prepare(document)</code></dt>
+      <dd>Called on document before any processing.</dd>
+      <dt><code>collect()</code></dt>
+      <dd>Called after processing is done.</dd>
+      <dt><code>result()</code></dt>
+      <dd>Called to return result. By default returns <code>self</code> if <code>extracted</code>. You can override method, or redefine with class method <code>result</code>.</dd>
+    </dl>
+    <h2>Example</h2>
+    <pre>
+require "rubygems"
+require "scrapi"
+
+ebay_auction = Scraper.define do
+  process "h3.ens&gt;a",             :description=&gt;:text, :url=&gt;"@href"
+  process "td.ebcPr&gt;span",        :price=&gt;:text
+  process "div.ebPicture&gt;a&gt;img",  :image=&gt;"@src"
+  result :description, :url, :price, :image
+end
+
+ebay = Scraper.define do
+  array :auctions
+  process "table.ebItemlist tr.single", :auctions=&gt;ebay_auction
+  result :auctions
+end
+
+puts ebay.scrape(URI.parse("http://search.ebay.com/..."))
+    </pre>
+    <p class="copyright">&copy; 2006 Assaf Arkin <a href="http://labnotes.org">http://labnotes.org</a><br/>Released under Creative Commons Attribution</p>
+  </body>
+</html>

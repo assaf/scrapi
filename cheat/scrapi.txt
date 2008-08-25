@@ -1,0 +1,59 @@
+Scraper.scrape(source, options?) => result
+
+  Scrapes source and returns the result. Source is one of:
+    String        HTML content: parse and scrape.
+    URI           Page URL: read, parse and scrape.
+    HTML::Node    Element or document, for use with structures.
+
+  Options for reading: :last_modified, :etag, :redirect_limit, :user_agent, :timeout.
+  Options for parsing: :root_element, :parser, :parser_options.
+
+process(selector, *values, extractor?) { |element| .... }
+process(symbol?, selector, *values, extractor?) { |element| ... }
+
+  Use selector to select elements, and extractor to extract and store values. Pass each selected element to the block. Block can be used instead of or in combination with extractors.
+
+  Extract value from (see more options in API):
+    :element      Element itself
+    :text         Text value of element
+    Class         Another scraper
+    "elem"        Element if name matches
+    "@attr"       Attribute if specified
+    "elem@attr"   Attribute if specified on element
+    [value, ...]  First value that matches
+
+  Extract value to (more options in API):
+    symbol        Instance variable (e.g. :title to @title)
+    symbol[]      Array instance variable (e.g. "links[]")
+    :skip         If true, do not further process this element
+
+  Attribute accessors defined for each symbol used.
+  If first argument is symbol, uses that name to replace any other processing rule with same name.
+
+process_first(selector, *values, extractor?) { |element| .... }
+process_first(symbol?, selector, *values, extractor?) { |element| ... }
+
+  Similar to process but only processes the first selected element (if more than one).
+
+result(*symbols)
+
+  Specifies which instance variables to return. One symbol: return value of that variable. Multiple symbols: return object with suitable accessors.
+
+array(*symbols)
+
+  Specifies which instance variables are arrays. Otherwise, stores only last extracted value.
+
+selector(symbol, selector, *values)
+selector(symbol?, selector, *values) { |elements| ... }
+
+  Defines selector method with the given name (symbol) that takes an element as argument and returns array of selected elements, empty if no elements selected. Defines first_ method that returns the first selected element or nil.
+
+Instance Methods
+
+  extracted         True if any processing rule returned true (also extracted = true/false).
+  skip(element?)    Do not further process element. See also :skip=&gt;true.
+  stop()            Stop processing.
+  prepare(document) Called on document before any processing.
+  collect()         Called after processing is done.
+  result()          Called to return result. By default returns self if extracted. You can override method, or redefine with class method result.
+
