@@ -14,7 +14,7 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.title    = "Scraper"
   rdoc.options << "--line-numbers"
   rdoc.options << "--inline-source"
-  rdoc.rdoc_files.include("README")
+  rdoc.rdoc_files.include("README.rdoc")
   rdoc.rdoc_files.include("lib/**/*.rb")
 end
 
@@ -49,14 +49,14 @@ EOF
   spec.email = "assaf.arkin@gmail.com"
   spec.homepage = "http://blog.labnotes.org/category/scrapi/"
 
-  spec.files = FileList["{test,lib}/**/*", "README", "CHANGELOG", "Rakefile", "MIT-LICENSE"].to_a
+  spec.files = FileList["{test,lib}/**/*", "README.rdoc", "CHANGELOG", "Rakefile", "MIT-LICENSE"].to_a
   spec.require_path = "lib"
   spec.autorequire = "scrapi.rb"
   spec.requirements << "Tidy"
   spec.add_dependency "tidy",  ">=1.1.0"
   spec.has_rdoc = true
-  spec.rdoc_options << "--main" << "README" << "--title" <<  "scrAPI toolkit for Ruby" << "--line-numbers"
-  spec.extra_rdoc_files = ["README"]
+  spec.rdoc_options << "--main" << "README.rdoc" << "--title" <<  "scrAPI toolkit for Ruby" << "--line-numbers"
+  spec.extra_rdoc_files = ["README.rdoc"]
   spec.rubyforge_project = "scrapi"
 end
 
