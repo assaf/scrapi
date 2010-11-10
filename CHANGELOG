@@ -1,3 +1,7 @@
+Version 2.0.0 (November 10, 2010)
+
+* Ruby 1.9.2 support using Tidy FFI, by Christoph Lupprich.
+
 Version 1.2.1 (Upcoming)
 
 * Added: Cheat sheets.

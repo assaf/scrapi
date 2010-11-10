@@ -1,0 +1,21 @@
+PATH
+  remote: .
+  specs:
+    scrapi (1.2.2)
+      tidy_ffi (>= 0.1.2)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    ffi (0.6.3)
+      rake (>= 0.8.7)
+    rake (0.8.7)
+    tidy_ffi (0.1.3)
+      ffi (>= 0.3.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  scrapi!
+  tidy_ffi (>= 0.1.2)

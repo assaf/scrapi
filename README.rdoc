@@ -42,7 +42,13 @@ svn co http://labnotes.org/svn/public/ruby/scrapi
 
 == Version of Ruby
 
-Currently ScrAPI does not run with Ruby 1.9.2, but with the dev versions of Ruby 1.9.3. This is due to a bug in Ruby's visibility context handling (see changelog #29578 and bug #3406 on the official Ruby page). Using the most recent dev version of Ruby is easy with RVM (http://rvm.beginrescueend.com/).
+ScrAPI 1.2.x tested with Ruby 1.8.6 and 1.8.7, but will not work on Ruby 1.9.x.
+
+ScrAPI 2.0.x switches to TidyFFI to runs on Ruby 1.9.2 and newer.
+
+Due to a bug in Ruby's visibility context handling (see changelog #29578 and bug
+#3406 on the official Ruby page), you need to declare all result attributes
+explicitly, using result method or attr_reader/_accessor.
 
 == Using TIDY
 

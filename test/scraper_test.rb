@@ -287,6 +287,7 @@ class ScraperTest < Test::Unit::TestCase
     scraper = new_scraper(html) do
       process "#1", :this1=>:text
       process "#1", :this2=>:text
+      attr_reader :this1, :this2
     end
     scraper.scrape
     assert_equal "this", scraper.this1
@@ -295,6 +296,7 @@ class ScraperTest < Test::Unit::TestCase
     scraper = new_scraper(html) do
       process "#1", :this1=>:text, :skip=>false
       process "#1", :this2=>:text
+      attr_reader :this1, :this2
     end
     scraper.scrape
     assert_equal "this", scraper.this1
@@ -305,6 +307,7 @@ class ScraperTest < Test::Unit::TestCase
         element
       end
       process "#1", :this2=>:text
+      attr_reader :this1, :this2
     end
     scraper.scrape
     assert_equal "this", scraper.this1
@@ -563,6 +566,7 @@ class ScraperTest < Test::Unit::TestCase
       process "h1", [:text, :kls]=>Scraper.define {
         process "*", :text=>:text, :kls=>"@class"
       }
+      attr_reader :text, :kls
     end
     result = scraper.scrape
     assert "first",   result.text
@@ -618,6 +622,7 @@ class ScraperTest < Test::Unit::TestCase
 
     scraper = new_scraper(DIVS_ST_ND) do
       process_first "div", :div_id=>"@id", :div_text=>:text
+      attr_reader :div_id, :div_text
     end
     value = scraper.scrape
     assert_equal "1",     value.div_id
