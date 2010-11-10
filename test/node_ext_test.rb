@@ -7,7 +7,7 @@
 
 require "rubygems"
 require "test/unit"
-require File.join(File.dirname(__FILE__), "../lib", "scrapi")
+require "./lib/scrapi"
 
 
 class NodeExtTest < Test::Unit::TestCase

@@ -8,8 +8,8 @@
 require "rubygems"
 require "time"
 require "test/unit"
-require File.join(File.dirname(__FILE__), "mock_net_http")
-require File.join(File.dirname(__FILE__), "../lib", "scrapi")
+require "./test/mock_net_http"
+require "./lib/scrapi"
 
 
 class ScraperTest < Test::Unit::TestCase
@@ -301,8 +301,8 @@ class ScraperTest < Test::Unit::TestCase
     assert_equal "this", scraper.this2
 
     scraper = new_scraper(html) do
-      process "#1", :this1=>:text, :skip=>true do
-        false
+      process "#1", :this1=>:text, :skip=>true do |element|
+        element
       end
       process "#1", :this2=>:text
     end
@@ -351,7 +351,7 @@ class ScraperTest < Test::Unit::TestCase
         [response, <<-EOF
           <html>
             <head>
-              <meta http-equiv="content-type" value="text/html; charset=other-encoding">
+              <meta http-equiv="content-type" value="text/html; charset=ASCII">
             </head>
             <body>
               <div id="x"/>
@@ -371,7 +371,7 @@ class ScraperTest < Test::Unit::TestCase
     assert_equal "http://localhost/redirect", scraper.page_info.url.to_s
     assert_equal time, scraper.page_info.last_modified
     assert_equal "etag", scraper.page_info.etag
-    assert_equal "other-encoding", scraper.page_info.encoding
+    assert_equal "ASCII", scraper.page_info.encoding
   end
 
 
@@ -721,7 +721,7 @@ class ScraperTest < Test::Unit::TestCase
     # Extracting the attribute skips the second match.
     scraper = new_scraper(DIVS123) do
       process("div") { |element| @count +=1 }
-      define_method(:prepare) { @count = 1 }
+      define_method(:prepare) { |element| @count = 1 }
       define_method(:result) { @count }
     end
     result = scraper.scrape

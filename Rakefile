@@ -1,6 +1,5 @@
 require "benchmark"
 require "rubygems"
-Gem::manage_gems
 require "rake"
 require "rake/testtask"
 require "rake/rdoctask"

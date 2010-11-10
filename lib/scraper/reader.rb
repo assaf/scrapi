@@ -10,7 +10,7 @@ require "net/http"
 require "net/https"
 begin
   require "rubygems"
-  require "tidy"
+  require "tidy_ffi"
 rescue LoadError
 end
 
@@ -95,6 +95,7 @@ module Scraper
     # * :redirect_limit -- Number of redirects allowed (default is 3).
     # * :user_agent -- The User-Agent header to send.
     # * :timeout -- HTTP open connection/read timeouts (in second).
+    # * :ssl_verify_mode -- SSL verification mode, defaults to OpenSSL::SSL::VERIFY_NONE
     #
     # It returns a hash with the following information:
     # * :url -- The URL of the requested page (may change by permanent redirect)
@@ -123,6 +124,7 @@ module Scraper
       begin
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = (uri.scheme == "https")
+        http.verify_mode = options[:ssl_verify_mode] || OpenSSL::SSL::VERIFY_NONE
         http.close_on_empty_response = true
         http.open_timeout = http.read_timeout = options[:http_timeout] || DEFAULT_TIMEOUT
         path = uri.path.dup # required so we don't modify path
@@ -202,10 +204,8 @@ module Scraper
           find_tidy
           options = (options || {}).update(TIDY_OPTIONS)
           options[:input_encoding] = encoding.gsub("-", "").downcase
-          document = Tidy.open(options) do |tidy|
-            html = tidy.clean(content)
-            HTML::Document.new(html).find(:tag=>"html")
-          end
+          html = TidyFFI::Tidy.with_options(options).clean(content)
+          document = HTML::Document.new(html).find(:tag=>"html")
         when :html_parser
           document = HTML::HTMLParser.parse(content).root
         else
@@ -223,14 +223,14 @@ module Scraper
   module_function
 
     def find_tidy()
-      return if Tidy.path
+      return if TidyFFI.library_path
       begin
-        Tidy.path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.so")
+        TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.so")
       rescue LoadError
         begin
-          Tidy.path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dll")
+          TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dll")
         rescue LoadError
-          Tidy.path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dylib")
+          TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dylib")
         end
       end
     end

@@ -12,8 +12,8 @@ require "webrick"
 require "webrick/https"
 require "logger"
 require "stringio"
-require File.join(File.dirname(__FILE__), "mock_net_http")
-require File.join(File.dirname(__FILE__), "../lib", "scrapi")
+require "./test/mock_net_http"
+require "./lib/scrapi"
 
 
 class ReaderTest < Test::Unit::TestCase
@@ -239,22 +239,22 @@ class ReaderTest < Test::Unit::TestCase
     # Test content encoding returned from HTTP server.
     with_webrick do |server, params|
       server.mount_proc "/test.html" do |req,resp|
-        resp["Content-Type"] = "text/html; charset=my-encoding"
+        resp["Content-Type"] = "text/html; charset=ASCII"
         resp.body = "Content comes here"
       end
       page = Reader.read_page(WEBRICK_TEST_URL)
       page = Reader.parse_page(page.content, page.encoding)
-      assert_equal "my-encoding", page.encoding
+      assert_equal "ASCII", page.encoding
     end
     # Test content encoding in HTML http-equiv header
     # that overrides content encoding returned in HTTP.
     with_webrick do |server, params|
       server.mount_proc "/test.html" do |req,resp|
-        resp["Content-Type"] = "text/html; charset=my-encoding"
+        resp["Content-Type"] = "text/html; charset=ASCII"
         resp.body = %Q{
 <html>
 <head>
-<meta http-equiv="content-type" value="text/html; charset=other-encoding">
+<meta http-equiv="content-type" value="text/html; charset=UTF-8">
 </head>
 <body></body>
 </html>
@@ -262,7 +262,7 @@ class ReaderTest < Test::Unit::TestCase
       end
       page = Reader.read_page(WEBRICK_TEST_URL)
       page = Reader.parse_page(page.content, page.encoding)
-      assert_equal "other-encoding", page.encoding
+      assert_equal "UTF-8", page.encoding
     end
   end
 
@@ -270,7 +270,7 @@ class ReaderTest < Test::Unit::TestCase
     begin
       options = WEBRICK_OPTIONS.dup.update(
         :SSLEnable=>true,
-        :SSLVerifyClient => ::OpenSSL::SSL::VERIFY_NONE,
+        :SSLVerifyClient => OpenSSL::SSL::VERIFY_NONE,
         :SSLCertName => [ ["C","JP"], ["O","WEBrick.Org"], ["CN", "WWW"] ]
       )
       server = WEBrick::HTTPServer.new(options)
