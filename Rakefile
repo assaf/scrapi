@@ -1,8 +1,9 @@
 require "benchmark"
 require "rubygems"
 require "rake"
-require "rake/testtask"
-require "rake/rdoctask"
+require 'rake/testtask'
+require 'rdoc'
+require 'rdoc/task'
 
 
 spec = Gem::Specification.load(File.join(File.dirname(__FILE__), 'scrapi.gemspec'))
