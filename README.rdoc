@@ -5,11 +5,18 @@ select => extract => store processing rules.
 
 Here’s an example that scrapes auctions from eBay:
 
+  require 'net/http'
+  require 'uri'
+  require 'scrapi'
+
+  url  = "http://www.ebay.com/sch/i.html?_from=R40&_trksid=p2050601.m570.l1313.TR0.TRC0.H0.Xapple+watch.TRS0&_nkw=apple+watch&_sacat=0"
+  html = Net::HTTP.get(URI.parse(url))
+
   ebay_auction = Scraper.define do
-    process "h3.ens>a", :description=>:text,
+    process "h3.lvtitle>a", :description=>:text,
                         :url=>"@href"
-    process "td.ebcPr>span", :price=>:text
-    process "div.ebPicture >a>img", :image=>"@src"
+    process "li.lvprice.prc>span", :price=>:text
+    process "div a.img.imgWr2>img", :image=>"@src"
 
     result :description, :url, :price, :image
   end
@@ -17,11 +24,12 @@ Here’s an example that scrapes auctions from eBay:
   ebay = Scraper.define do
     array :auctions
 
-    process "table.ebItemlist tr.single",
+    process "ul li.sresult.lvresult",
             :auctions => ebay_auction
 
     result :auctions
   end
+
 
 And using the scraper:
 

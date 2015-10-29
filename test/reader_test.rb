@@ -12,6 +12,7 @@ require "webrick"
 require "webrick/https"
 require "logger"
 require "stringio"
+require "uri"
 require "./test/mock_net_http"
 require "./lib/scrapi"
 
@@ -21,14 +22,14 @@ class ReaderTest < Test::Unit::TestCase
   include Scraper
 
 
-  WEBRICK_OPTIONS = {
+  @@port = 2000
+  @@webricks_options = {
     :BindAddredd=>"127.0.0.1",
-    :Port=>2000,
+    :Port=>@@port,
     :Logger=>Logger.new(StringIO.new) # /dev/null
   }
 
-  WEBRICK_TEST_URL = "http://127.0.0.1:2000/test.html"
-
+  @@webrick_test_url = URI("http://127.0.0.1:#{@@port}/test.html")
 
   def setup
     Net::HTTP.reset_on_get
@@ -63,11 +64,11 @@ class ReaderTest < Test::Unit::TestCase
     # Test timeout error and HTTP status that we can't process.
     Net::HTTP.on_get { |address, path, headers| raise TimeoutError }
     assert_raise(Reader::HTTPTimeoutError) do
-      response = Reader.read_page("http://localhost/path?query")
+      Reader.read_page("http://localhost/path?query")
     end
     Net::HTTP.on_get { |address, path, headers| [Net::HTTPRequestTimeOut.new(Net::HTTP.version_1_2, 408, "Timeout"),""] }
     assert_raise(Reader::HTTPTimeoutError) do
-      response = Reader.read_page("http://localhost/path?query")
+      Reader.read_page("http://localhost/path?query")
     end
   end
 
@@ -80,7 +81,7 @@ class ReaderTest < Test::Unit::TestCase
       [response, ""]
     end
     assert_raise(Reader::HTTPRedirectLimitError) do
-      response = Reader.read_page("http://localhost/path?query")
+      Reader.read_page("http://localhost/path?query")
     end
     Net::HTTP.on_get do |address, path, headers|
       response = Net::HTTPRedirection.new(Net::HTTP.version_1_2, 300, "Moved")
@@ -88,7 +89,7 @@ class ReaderTest < Test::Unit::TestCase
       [response, ""]
     end
     assert_raise(Reader::HTTPRedirectLimitError) do
-      response = Reader.read_page("http://localhost/path?query")
+      Reader.read_page("http://localhost/path?query")
     end
   end
 
@@ -101,7 +102,7 @@ class ReaderTest < Test::Unit::TestCase
       [response, ""]
     end
     assert_raise(Reader::HTTPInvalidURLError) do
-      response = Reader.read_page("http://localhost/path?query")
+      Reader.read_page("http://localhost/path?query")
     end
   end
 
@@ -242,7 +243,7 @@ class ReaderTest < Test::Unit::TestCase
         resp["Content-Type"] = "text/html; charset=ASCII"
         resp.body = "Content comes here"
       end
-      page = Reader.read_page(WEBRICK_TEST_URL)
+      page = Reader.read_page(@@webrick_test_url)
       page = Reader.parse_page(page.content, page.encoding)
       assert_equal "ASCII", page.encoding
     end
@@ -260,7 +261,7 @@ class ReaderTest < Test::Unit::TestCase
 </html>
         }
       end
-      page = Reader.read_page(WEBRICK_TEST_URL)
+      page = Reader.read_page(@@webrick_test_url)
       page = Reader.parse_page(page.content, page.encoding)
       assert_equal "UTF-8", page.encoding
     end
@@ -268,14 +269,15 @@ class ReaderTest < Test::Unit::TestCase
 
   def test_should_support_https
     begin
-      options = WEBRICK_OPTIONS.dup.update(
+      options = @@webricks_options.dup.update(
+        :Port=>@@port,
         :SSLEnable=>true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_NONE,
         :SSLCertName => [ ["C","JP"], ["O","WEBrick.Org"], ["CN", "WWW"] ]
       )
       server = WEBrick::HTTPServer.new(options)
       trap("INT") { server.shutdown }
-      Thread.new { server.start }
+      thread = Thread.new { server.start }
       server.mount_proc "/test.html" do |req,resp|
         resp.body = %Q{
 <html>
@@ -288,13 +290,19 @@ class ReaderTest < Test::Unit::TestCase
       end
       # Make sure page not HTTP accessible.
       assert_raises(Reader::HTTPUnspecifiedError) do
-        Reader.read_page(WEBRICK_TEST_URL)
+        Reader.read_page(@@webrick_test_url)
       end
-      page = Reader.read_page(WEBRICK_TEST_URL.gsub("http", "https"))
+      @@webrick_test_url.scheme = 'https'
+      page = Reader.read_page(@@webrick_test_url)
       page = Reader.parse_page(page.content, page.encoding)
       assert_equal "<title>test https</title>",
          page.document.find(:tag=>"title").to_s
       server.shutdown
+      thread.join
+    rescue Errno::EADDRINUSE
+      @@port +=1
+      @@webrick_test_url.port = @@port
+      retry
     ensure
       server.shutdown if server
     end
@@ -305,11 +313,16 @@ private
 
   def with_webrick(params = nil)
     begin
-      server = WEBrick::HTTPServer.new(WEBRICK_OPTIONS)
+      @@webricks_options.merge!(:Port => @@port)
+      server = WEBrick::HTTPServer.new(@@webricks_options)
       trap("INT") { server.shutdown }
       Thread.new { server.start }
-      yield server, params
+      yield server, params if block_given?
       server.shutdown
+    rescue Errno::EADDRINUSE
+      @@port += 1
+      @@webrick_test_url.port = @@port
+      retry
     ensure
       server.shutdown if server
     end

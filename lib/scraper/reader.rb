@@ -224,14 +224,13 @@ module Scraper
 
     def find_tidy()
       return if TidyFFI.library_path
-      begin
+      case RUBY_PLATFORM
+      when /darwin/
+        TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dylib")
+      when /linux/
         TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.so")
-      rescue LoadError
-        begin
-          TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dll")
-        rescue LoadError
-          TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dylib")
-        end
+      when /cygwin|mswin|mingw|bccwin|wince|emx/
+        TidyFFI.library_path = File.join(File.dirname(__FILE__), "../tidy", "libtidy.dll")
       end
     end
 
